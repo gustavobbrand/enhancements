@@ -134,7 +134,7 @@ you're proposing, but should not include things like API designs or
 implementation.  The "Design Details" section below is for the real
 nitty-gritty.
 -->
-At a first step we propose to optionally leverage the IDevID and IAK keys/certificates to register each device at the registrar service. This would enable attestation based on the IAK if desired, or it's possible to keep the attestation based on the ephemeral AK while including the IDevID and IAK exchange within the registering process to: 1) further check of the device based on IDevID information and CA trustchain ; 2) later use of IAK for generation of LAK and LDevID.
+We propose to optionally leverage the IDevID and IAK keys/certificates to register each device at the registrar service and generate the LDevID and LAK keys/certificates. This will enable: 1) further check of the device based on IDevID information and CA trustchain ; 2) use of IAK for generation of LAK and LDevID ; 3) attestation based on LAK instead of an ephemeral AK.
 
 Adding support for IDevID and IAK as an option to the Keylime registrar and verifier services, as for the RUST agent, will allow our users to take advantage of IDevID and IAK when using Keylime. It will promote use of IDevID for switches and servers, which will improve security for all users.
 Using the IAK and IDevID credentials would mean the OEM had already exercised the proof of residency pre-requisites for generating the credentials, making it possible to simplify the registering process to a single exchange from the agent to the registrar service, by skipping the DevID provisioning in the field.
@@ -191,8 +191,8 @@ A potential workflow is presented below:
 3. Regeneration of IAK and IDevID possible info (create create_iak and create_idevid routines)
 4. Load the IDevID and IAK and IDevID certificates from a given local path and send them along with the rest of the attestation/measured data to the registrar service
 5. Create keys for LAK and LDevID based on the IAK.
-6. Encode the necessary data and send it to the registrar service (modify the method do_register_agent to support the new parameters regarding DevID and AK keys). 
-7. Receive the challenge to prove that is actually has the DevID and AK keys. 
+6. Encode the necessary data and send it to the registrar service (modify the method do_register_agent to support the new parameters regarding IDevID, LDevID, IAK and LAK keys). 
+7. Receive the challenge to prove that is actually has the IDevID, LDevID, IAK and LAK keys. 
 8. Sends challenge response back to the registrar service.
 9. The agent gets its UUID in case of a successful registering process.
 

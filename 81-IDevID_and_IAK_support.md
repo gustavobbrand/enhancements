@@ -136,6 +136,12 @@ nitty-gritty.
 -->
 We propose to optionally leverage the IDevID and IAK keys/certificates to register each device at the registrar service and generate the LDevID and LAK keys/certificates. This will enable: 1) further check of the device based on IDevID information and CA trustchain ; 2) use of IAK for generation of LAK and LDevID ; 3) attestation based on LAK instead of an ephemeral AK.
 
+For compatibility reasons and taking into account different scenarios, the proposal extends to the ones detailed below regarding the possible keys. When EAK is mentioned it means an ephemeral Attestation Key that can be generated at the TPM with access to exporting it's public and private parts (not a Primary Key).
+ * EK, EK certificate and EAK: this is the current configuration used in Keylime
+ * EK, EK certificate, IDevID, IAK and EAK: this configuration can be used when an IDevID and IAK exists, but the user does not want to maintain a CA for issuing LDevIDs or LAKs.
+ * EK, EK certificate, LDevID and LAK: this configuration can be used when a persistent AK is required but no IDevID is available, linking the LDevID on the EK.
+ * EK, EK certificate, IDevID, IAK, LDevID and LAK: this configuration enables issuing LDevID and LAKs based on the IAK (from the OEM) and allows the user/client to issue LAK certificates from this own CA.
+
 Adding support for IDevID and IAK as an option to the Keylime registrar and verifier services, as for the RUST agent, will allow our users to take advantage of IDevID and IAK when using Keylime. It will promote use of IDevID for switches and servers, which will improve security for all users.
 Using the IAK and IDevID credentials would mean the OEM had already exercised the proof of residency pre-requisites for generating the credentials, making it possible to simplify the registering process to a single exchange from the agent to the registrar service, by skipping the DevID provisioning in the field.
 
@@ -183,7 +189,7 @@ change are understandable.  This may include API specs (though not always
 required) or even code snippets.  If there's any ambiguity about HOW your
 proposal will be implemented, this is the place to discuss them.
 -->
-A potential workflow is presented below:
+A potential workflow is presented below for the scenario using EK, EK certificate, IDevID, IAK, LDevID and LAK. The other scenarios will include most parts of this workflow.
 
 ### Registration from the agent perspective when interacting with the registrar service
 1. Create session (done at get_tpm2_ctx)   
@@ -207,8 +213,8 @@ A potential workflow is presented below:
 7. Activate the agent. This implies on modifying the method do_activate_agent at keylime\keylime\registrar_client.py to support new parameters regarding IAK and IDevID. This method exercises a PUT to /v{api_version}/agents/{agent_id}/activate at registrar_common.py do_PUT method.  
 
 ### Attestation from the verifier perspective after the registration process
-The work from the verifier perspective can keep using the ephemeral AK, while this work can be the basis for preparing for using a LAK based on IAK on a second step.
-A second option is replacing was is being executed with the ephemeral AK to follow with the IAK.
+The work from the verifier perspective can keep using the ephemeral AK or switch between all the possible scenarios mentioned. 
+These scenarios will be implemented gradually.
 
 ### Test Plan
 

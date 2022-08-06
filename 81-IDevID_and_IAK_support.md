@@ -147,6 +147,7 @@ Using the IAK and IDevID credentials would mean the OEM had already exercised th
 
 If required, it would be possible to send a challenge (nonce) to a node agent to prove it owns the TPM protected private IAK key. A nonce challenge to make sure that the node can access the IAK private key is not mandatory but would be good just for avoiding registering a node that is invalid (does not have access to the private key related to the certificate provided). Even without this, the node would not be able to attest later.
 
+Finally, it will be required further planning on how the IAK certificates will be accepted. The registrar service will need to be configured with a set of trusted CA certificates for validating IAK certificates in order to support a multi-OEM environments.
 
 ### User Stories (optional)
 
@@ -214,7 +215,7 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 
 ### Attestation from the verifier perspective after the registration process
 The work from the verifier perspective can keep using the ephemeral AK or switch between all the possible scenarios mentioned. 
-These scenarios will be implemented gradually.
+This is being though a multi-step plani and these scenarios will be implemented gradually. 
 
 ### Test Plan
 

@@ -196,7 +196,7 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 1. Create session (done at get_tpm2_ctx)   
 2. Get endorsement certificate from TPM NV index and EK public key (done at create_ek)
 3. Regeneration of IAK and IDevID possible info (create create_iak and create_idevid routines)
-4. Load the IDevID and IAK and IDevID certificates from a given local path and send them along with the rest of the attestation/measured data to the registrar service
+4. Load the IDevID and IAK and their certificates from a given local path and send them along with the rest of the attestation/measured data to the registrar service
 5. Create keys for LAK and LDevID based on the IAK.
 6. Encode the necessary data and send it to the registrar service (modify the method do_register_agent to support the new parameters regarding IDevID, LDevID, IAK and LAK keys). 
 7. Receive the challenge to prove that is actually has the IDevID, LDevID, IAK and LAK keys. 

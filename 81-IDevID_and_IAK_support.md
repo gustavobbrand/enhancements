@@ -152,7 +152,16 @@ If required, it would be possible to send a challenge (nonce) to a node agent to
 
 Either the EAK or the LAK can be used for attestation, and in case there is no IDevID and IAK keys then the EAK is verified using the EK and the Make and Activate credential process. Furthermore, the idea is not using the IAK for the actual attestation at first, so it's necessary to enroll an EAK. The IAK and IDevID certificates and their associated keys don't expire, as they are intended to last the life of the product, so several years at least. To preserve the cryptographic strength of the keys it is recommended to minimize their use.
 
-Finally, further planning will be required on how the IAK certificates will be accepted. The registrar service will need to be configured with a set of trusted CA certificates for validating IAK certificates in order to support a multi-OEM environments.
+Regarding the validation process on how the IAK and IDevID certificates will be accepted: the registrar service will need to be configured with a set of trusted CA certificates for validating IAK and IDevID certificates in order to support a multi-OEM environments. More precisely, when used they will be validated through: 
+1) checking the validity of the certificate chain from the OEM; 
+2) checking the device SKU and Serial number present at the IDevID cert; 
+3) executing a challenge/response with the agent to ensure it has the private keys. The IAK and IDevID can be checked on the same manner.
+
+Regarding the item 1 when checking of the certificate chain, the OEM should supply the IDevID and IAK signed certificates along with the necessary intermediaty certificates used within the signing process. The Root CA Cert of each OEM should be suplied by it to the Keylime community and internally a local database or directory within the registrar service should be assigned to store these safely. This way the registrar service will be able to fully validate the trust chain. 
+
+In case the Root CA Cert of the OEM is not available and/or the intermediate certs are not provided, this will block the validation of item 1, but this should be configurable. At the configuration files it should be possible to enable the IAK and IDevID validation, as specify if the steps 1 and 2 are required. This will allow using the IDevID and IAK even if the certificates are not available (item 1) or if the SKU and Serial number information are not the fields the OEM has chosen to be at the IDevID. 
+
+Regarding the validation of LAK and LDevID: the LAK should be verified to be in the same TPM as the IAK provided by the OEM and the IAK certificate shows at which device this key resides on. The LDevID key should be verified to be in the same TPM as the LAK.
 
 ### User Stories (optional)
 
@@ -202,7 +211,7 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 2. Get endorsement certificate from TPM NV index and EK public key (done at create_ek)
 3. Regeneration of IAK and IDevID possible info (create create_iak and create_idevid routines)
 4. Load the IDevID and IAK and their certificates from a given local path and send them along with the rest of the attestation/measured data to the registrar service
-5. Create keys for LAK and LDevID based on the IAK.
+5. If possible, load the LAK and LDevID keys from disk, otherwise create them based on the IAK.
 6. Encode the necessary data and send it to the registrar service (modify the method do_register_agent to support the new parameters regarding IDevID, LDevID, IAK and LAK keys). 
 7. Receive the challenge to prove that is actually has the IDevID, LDevID, IAK and LAK keys. 
 8. Sends challenge response back to the registrar service.

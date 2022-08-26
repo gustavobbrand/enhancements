@@ -117,6 +117,7 @@ know that this has succeeded?
 -->
  * Use IDevID and IAK keys/certificates to register each device at the registrar service
  * Use LDevID and LAK keys/certificates to register each device at the registrar service
+ * Provisioning of LDevID and LAKs based on the IAK. The provisioning is done outside of Keylime, or at least as a separate tool.
 
 ### Non-Goals
 
@@ -125,7 +126,6 @@ What is out of scope for this enhancement?  Listing non-goals helps to focus dis
 and make progress.
 --> 
  * mTLS usage scenario 
- * Provisioning of LDevID and LAKs based on the IAK. The provisioning is done outside of Keylime.
 
 ## Proposal
 
@@ -148,7 +148,7 @@ For compatibility reasons and taking into account different scenarios, the propo
 Adding support for IDevID and IAK as an option to the Keylime registrar, to the RUST agent, and verifier services, allows our users to take advantage of IDevID and IAK when using Keylime. It will promote use of IDevID for switches and servers, which will improve security for all users.
 Using the IAK and IDevID credentials would mean the OEM had already exercised the proof of residency pre-requisites for generating the credentials, making it possible to simplify the registering process to a single exchange from the agent to the registrar service, by skipping the DevID provisioning in the field.
 
-If required, it would be possible to send a challenge (nonce) to a node agent to prove it owns the TPM protected private IAK key. A nonce challenge to make sure that the node can access the IAK private key is not mandatory but would be good just for avoiding registering a node that is invalid (does not have access to the private key related to the certificate provided). Explicit proof of possesion of the private IAK key is not required as the TPM needs this when using TPM2_Certify in the process, which can use the nonce, and that is used for the proof of co-residency between the IAK and LDevID/LAK/EAK.
+It was agreed on also sending a challenge (nonce) to the node agent to prove it owns the TPM protected private EAK key, avoiding registering a node that is invalid (does not have access to the private key related to the certificate provided). Regarding the IAK key the explicit proof of possesion of the private IAK key is not required as the TPM needs this when using TPM2_Certify in the process, which can use the nonce, and that is used for the proof of co-residency between the IAK and LDevID/LAK/EAK.
 
 Either the EAK or the LAK can be used for attestation, and in case there is no IDevID and IAK keys then the EAK is verified using the EK and the Make and Activate credential process. Furthermore, the idea is not to use the IAK for attestation of the device after it is registered, so it's necessary to enroll an EAK. The IAK and IDevID certificates and their associated keys don't expire, as they are intended to last the life of the product, so several years at least. To preserve the cryptographic strength of the keys it is recommended to minimize their use.
 
@@ -173,8 +173,10 @@ bogged down.
 -->
 
 #### Story 1
+TODO: add IDevID scenario with Keylime using it to make sure the device is authentic.
 
 #### Story 2
+TODO: add LDevID scenario with the user creating its own identity.
 
 ### Notes/Constraints/Caveats (optional)
 
@@ -194,7 +196,9 @@ enhancement ecosystem.
 
 How will security be reviewed and by whom?
 -->
+The risk involved at this proposal is increasing the configuration complexity and by enabling using different chains of trust for the IDs.
 
+For mitigation it is necessary to properly document what is trusted during registration and what is not, besides providing examples on how to configure it correctly.
 
 ## Design Details
 
@@ -224,7 +228,7 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 4. Create a challenge to send to the agent for prove the possession of the private keys. It's important to mention that the challenge will change from using Make/ActivateCredential to use TPM2_Certify.
 4. Create a challenge to send to the agent for prove the possession of the private keys. 
 5. Receive the challenge response and process
-6. Generate the certificates for LAK and LDevID keys with the owner/company's CAs. 
+6. Load and check the certificates for LAK and LDevID keys with the owner/company's CAs. The certificates should be generated on a separate process.
 6. Commit data to the local Keylime database, the necessary fields regarding keys and certificates to be included there.  
 7. Activate the agent. This implies modifying the method do_activate_agent at keylime\keylime\registrar_client.py to support new parameters regarding IAK and IDevID. This method exercises a PUT to /v{api_version}/agents/{agent_id}/activate at registrar_common.py do_PUT method.  
 
@@ -258,7 +262,8 @@ this is in the test plan.
 
 Consider the following in developing an upgrade/downgrade strategy for this enhancement
 -->
-TBD
+In case of downgrade: don't use that feature as it will not be available.
+In case of updagres: it will be required to use the new API version to use this feature.
 
 ### Dependencie requirements
 

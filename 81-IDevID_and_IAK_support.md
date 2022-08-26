@@ -222,7 +222,7 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 9. The agent gets its UUID in case of a successful registering process.
 
 ### Registration from the registrar service perspective when interacting with the agent
-1. The main endpoints here are do_register_agent() and do_activate_agent() invoked by the agent.
+1. The main endpoints here are do_register_agent() and do_activate_agent() invoked by the agent. TODO: add the specific API changes here./
 2. Decode data and parse certificates. This implies modifying the method doRegisterAgent to support new parameters regarding IAK and IDevID. This method exercises a POST to /v{api_version}/agents/{agent_id} at registrar_common.py do_POST method.  
 3. Verify IDevID certificate chain of trust + IAK certificate chain of trust
 4. Create a challenge to send to the agent for prove the possession of the private keys. It's important to mention that the challenge will change from using Make/ActivateCredential to use TPM2_Certify.
@@ -252,7 +252,7 @@ challenging to test should be called out.
 All code is expected to have adequate tests (eventually with coverage
 expectations).
 -->
-TBD
+TODO: Add unit tests where possible and otherwise instructions on how to integrate it into our e2e test suite.
 
 ### Upgrade / Downgrade Strategy
 

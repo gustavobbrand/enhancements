@@ -173,10 +173,16 @@ bogged down.
 -->
 
 #### Story 1
-TODO: add IDevID scenario with Keylime using it to make sure the device is authentic.
+<!-- TODO: add IDevID scenario with Keylime using it to make sure the device is authentic. -->
+In order to securely identify that a device is genuine from a given OEM the IDevID can play an important role.
+Within the registration process, along with information like the EK and EAK, the IDevID key and certificates will be provided.
+At the registrar service the OEM Root CA will be configured and the IDevID trust chain will be checked, ensuring the certificates are signed by the OEM CAs. 
+In addition to the certificates the signed IDevID certificate Subject will contain the device's SN(Serial Number) and the registrar service will check it against the information obtained from the device.
 
 #### Story 2
-TODO: add LDevID scenario with the user creating its own identity.
+<!-- TODO: add LDevID scenario with the user creating its own identity. -->
+With the IAK provided by the OEM, the client will issue it's own LDevID signed by it's own CAs. Instead of a long lived certificate as the IDevID from the OEM, the client can renew this certificate on a more frequent basis and securely verify its binding to the IAK and the devices TPM. 
+Along with the LDevID, it will create LAKs for different services or workloads, enabling a secure execution of services issuing short lived LAKs according to the demand in place.
 
 ### Notes/Constraints/Caveats (optional)
 
@@ -222,7 +228,8 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 9. The agent gets its UUID in case of a successful registering process.
 
 ### Registration from the registrar service perspective when interacting with the agent
-1. The main endpoints here are do_register_agent() and do_activate_agent() invoked by the agent. TODO: add the specific API changes here./
+<!-- TODO: add the specific API changes here./ -->
+1. The main endpoints here are do_register_agent() and do_activate_agent() invoked by the agent. The registration will affect the /v{api_version}/agents/{agent_id} exchange, while the activation will affect the /v{api_version}/agents/{agent_id}/activate endpoint. The specific changes might not happen at the API endpoints, but on the data exchanged and the api_version to support the new information.
 2. Decode data and parse certificates. This implies modifying the method doRegisterAgent to support new parameters regarding IAK and IDevID. This method exercises a POST to /v{api_version}/agents/{agent_id} at registrar_common.py do_POST method.  
 3. Verify IDevID certificate chain of trust + IAK certificate chain of trust
 4. Create a challenge to send to the agent for prove the possession of the private keys. It's important to mention that the challenge will change from using Make/ActivateCredential to use TPM2_Certify.
@@ -252,7 +259,8 @@ challenging to test should be called out.
 All code is expected to have adequate tests (eventually with coverage
 expectations).
 -->
-TODO: Add unit tests where possible and otherwise instructions on how to integrate it into our e2e test suite.
+TBD
+<!-- TODO: Add unit tests where possible and otherwise instructions on how to integrate it into our e2e test suite. -->
 
 ### Upgrade / Downgrade Strategy
 

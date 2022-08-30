@@ -159,7 +159,7 @@ Regarding the validation process on how the IAK and IDevID certificates will be 
 
 Regarding the item 1 when checking of the certificate chain, the OEM should supply the IDevID and IAK signed certificates along with the necessary intermediaty certificates used within the signing process. Once the Keylime server is deployed the Root CA Cert of the OEMs should be configured within the registrar service. This way the registrar service will be able to fully validate the trust chain. 
 
-In case the Root CA Cert of the OEM is not available and/or the intermediate certs are not provided, this will block the validation of item 1, but this should be configurable. This will allow using the IDevID and IAK even if the certificates are not available (item 1) or if the Serial Number information is not available at the IDevID.
+In case the Root CA Cert of the OEM is not available and/or the intermediate certs are not provided, this will block the validation of item 1, but this should be configurable. This will allow using the IDevID and IAK even if the certificates are not available (item 1).
 
 Regarding the validation of LAK and LDevID: the LAK should be verified to be in the same TPM as the IAK provided by the OEM and the IAK certificate shows at which device this key resides on. The LDevID key should be verified to be in the same TPM as the LAK.
 

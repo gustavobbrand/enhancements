@@ -148,7 +148,7 @@ For compatibility reasons and taking into account different scenarios, the propo
 Adding support for IDevID and IAK as an option to the Keylime registrar, to the RUST agent, and verifier services, allows our users to take advantage of IDevID and IAK when using Keylime. It will promote use of IDevID for switches and servers, which will improve security for all users.
 Using the IAK and IDevID credentials would mean the OEM had already exercised the proof of residency pre-requisites for generating the credentials, making it possible to simplify the registering process to a single exchange from the agent to the registrar service, by skipping the DevID provisioning in the field.
 
-It was agreed on also sending a challenge (nonce) to the node agent to prove it owns the TPM protected private EAK key, avoiding registering a node that is invalid (does not have access to the private key related to the certificate provided). Regarding the IAK key the explicit proof of possesion of the private IAK key is not required as the TPM needs this when using TPM2_Certify in the process, which can use the nonce, and that is used for the proof of co-residency between the IAK and LDevID/LAK/EAK.
+A challenge (nonce) will be sent to the node agent to prove it owns the TPM protected private EAK key, avoiding registering a node that is invalid (does not have access to the private key related to the certificate provided). Explicit proof of possession of the private IAK key is not required as the TPM needs this when using TPM2_Certify in the process, which can use the nonce, and that is used for the proof of co-residency between the IAK and LDevID/LAK/EAK, so proof of possession is implicit
 
 Either the EAK or the LAK can be used for attestation, and in case there is no IDevID and IAK keys then the EAK is verified using the EK and the Make and Activate credential process. Furthermore, the idea is not to use the IAK for attestation of the device after it is registered, so it's necessary to enroll an EAK. The IAK and IDevID certificates and their associated keys don't expire, as they are intended to last the life of the product, so several years at least. To preserve the cryptographic strength of the keys it is recommended to minimize their use.
 
@@ -174,15 +174,14 @@ bogged down.
 
 #### Story 1
 <!-- TODO: add IDevID scenario with Keylime using it to make sure the device is authentic. -->
-In order to securely identify that a device is genuine from a given OEM the IDevID can play an important role.
-Within the registration process, along with information like the EK and EAK, the IDevID key and certificates will be provided.
+The IDevID plays an important role to securely identify that a device is genuine from a given OEM. Within the registration process, along with information like the EK and EAK, the IDevID key and certificates will be provided.
 At the registrar service the OEM Root CA will be configured and the IDevID trust chain will be checked, ensuring the certificates are signed by the OEM CAs. 
 In addition to the certificates the signed IDevID certificate Subject will contain the device's SN(Serial Number) and the registrar service will check it against the information obtained from the device.
 
 #### Story 2
 <!-- TODO: add LDevID scenario with the user creating its own identity. -->
-With the IAK provided by the OEM, the client will issue it's own LDevID signed by it's own CAs. Instead of a long lived certificate as the IDevID from the OEM, the client can renew this certificate on a more frequent basis and securely verify its binding to the IAK and the devices TPM. 
-Along with the LDevID, it will create LAKs for different services or workloads, enabling a secure execution of services issuing short lived LAKs according to the demand in place.
+With the IAK provided by the OEM, the client can issue it's own LDevID signed by it's own CAs. Instead of a long lived certificate as the IDevID from the OEM, the client can renew this certificate on a more frequent basis and securely verify its binding to the IAK and the devices TPM. 
+Along with the LDevID, it can create LAKs for different services or workloads, enabling a secure execution of services issuing short lived LAKs according to the demand in place.
 
 ### Notes/Constraints/Caveats (optional)
 
@@ -233,11 +232,10 @@ A potential workflow is presented below for the scenario using EK, EK certificat
 2. Decode data and parse certificates. This implies modifying the method doRegisterAgent to support new parameters regarding IAK and IDevID. This method exercises a POST to /v{api_version}/agents/{agent_id} at registrar_common.py do_POST method.  
 3. Verify IDevID certificate chain of trust + IAK certificate chain of trust
 4. Create a challenge to send to the agent for prove the possession of the private keys. It's important to mention that the challenge will change from using Make/ActivateCredential to use TPM2_Certify.
-4. Create a challenge to send to the agent for prove the possession of the private keys. 
 5. Receive the challenge response and process
-6. Load and check the certificates for LAK and LDevID keys with the owner/company's CAs. The certificates should be generated on a separate process.
-6. Commit data to the local Keylime database, the necessary fields regarding keys and certificates to be included there.  
-7. Activate the agent. This implies modifying the method do_activate_agent at keylime\keylime\registrar_client.py to support new parameters regarding IAK and IDevID. This method exercises a PUT to /v{api_version}/agents/{agent_id}/activate at registrar_common.py do_PUT method.  
+6. Load and check the certificates for LAK and LDevID keys with the owner/company's CAs. The certificates should be generated using a separate process.
+7. Commit data to the local Keylime database, the necessary fields regarding keys and certificates to be included there.  
+8. Activate the agent. This implies modifying the method do_activate_agent at keylime\keylime\registrar_client.py to support new parameters regarding IAK and IDevID. This method exercises a PUT to /v{api_version}/agents/{agent_id}/activate at registrar_common.py do_PUT method.  
 
 ### Attestation from the verifier perspective after the registration process
 The work from the verifier perspective can keep using the ephemeral AK or switch between all the possible scenarios mentioned. 
@@ -271,7 +269,7 @@ this is in the test plan.
 Consider the following in developing an upgrade/downgrade strategy for this enhancement
 -->
 In case of downgrade: don't use that feature as it will not be available.
-In case of updagres: it will be required to use the new API version to use this feature.
+In case of upgrade: it will be required to use the new API version for this feature.
 
 ### Dependencie requirements
 

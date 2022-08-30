@@ -161,7 +161,7 @@ Regarding the item 1 when checking of the certificate chain, the OEM should supp
 
 In case the Root CA Cert of the OEM is not available and/or the intermediate certs are not provided, this will block the validation of item 1, but this should be configurable. This will allow using the IDevID and IAK even if the certificates are not available (item 1) or if the Serial Number information is not available at the IDevID.
 
-Regarding the validation of LAK and LDevID: the LAK should be verified to be in the same TPM as the IAK provided by the OEM and the IAK certificate shows at which device this key resides on. The LDevID key should be verified to be in the same TPM as the LAK.
+Regarding the validation of LAK and LDevID: the LAK should be verified to be in the same TPM as the IAK provided by the OEM and the IAK certificate shows in which device this key resides on. The LDevID key should be verified to be in the same TPM as the LAK.
 
 ### User Stories (optional)
 
